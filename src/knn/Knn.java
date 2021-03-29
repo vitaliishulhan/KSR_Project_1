@@ -15,14 +15,13 @@ public class Knn {
 
     private final PlacesCounter placesCounter;
 
-    private final DistancesComparator dc = new DistancesComparator();
     private final Metric metric;
 
     private final List<Traits> trainSet;
     private final List<Traits> testSet;
     private final List<Place> testSetAssignedPlaces = new ArrayList<>();
     private final int k;
-    private boolean[] filter;
+    private boolean[] filter = new boolean[Traits.getTraitsAmount()];
 
     public Knn(final List<Traits> data, final int k, final int trainSetRelation, final Metric metric) {
         int divider = trainSetRelation <= 0 || trainSetRelation >= 100 ?
@@ -78,19 +77,23 @@ public class Knn {
 
         if(isDefaultFilter()) {
             for (Traits trainSample : trainSet) {
-                distances.add(new Object[]{trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits())});
+                distances.add(new Object[]{trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits(), trainSample.getTextTraits(), obj.getTextTraits())});
             }
         } else {
             boolean[] numberFilter = new boolean[obj.getNumberTraits().size()];
 
             System.arraycopy(filter, 0, numberFilter, 0, numberFilter.length);
 
+            boolean[] textFilter = new boolean[obj.getTextTraits().size()];
+
+            System.arraycopy(filter, obj.getNumberTraits().size(), textFilter, 0, textFilter.length);
+
             for (Traits trainSample : trainSet) {
-                distances.add(new Object[]{trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits(), numberFilter)});
+                distances.add(new Object[]{trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits(),  trainSample.getTextTraits(), obj.getTextTraits(), numberFilter, textFilter)});
             }
         }
 
-        distances.sort(dc);
+        distances.sort(Comparator.comparingDouble(o -> (double) o[1]));
 
         for (int i = 0; i < k; i++) {
             Place place = ((Traits)distances.get(i)[0]).getPlace();
@@ -108,28 +111,30 @@ public class Knn {
         }
     }
 
+    public List<Traits> getTestSet() {
+        return testSet;
+    }
+
+    public List<Place> getTestSetAssignedPlaces() {
+        return testSetAssignedPlaces;
+    }
 
     public static void main(String[] args) throws Exception {
 
         List<Traits> data = TraitExctractor.getTraitsVectorFor("articles/reut2-000.sgm");
 
-        assert data != null;
+        Knn knn = new Knn(data, 20, 30, new EuclidianMetric());
 
-        for(Traits trait: data) {
-            System.out.println(trait);
+        knn.classifyTestSet();
+
+        List<Traits> testSet = knn.getTestSet();
+        List<Place> assignedPlaces = knn.getTestSetAssignedPlaces();
+
+        for (int i = 0; i < testSet.size(); i++) {
+            System.out.println(testSet.get(i).getPlace() + " " + assignedPlaces.get(i));
         }
 
-//        Knn knn = new Knn(, 4, 30, new EuclidianMetric());
 
-    }
-}
-
-
-class DistancesComparator implements Comparator<Object[]> {
-
-    @Override
-    public int compare(Object[] o1, Object[] o2) {
-        return Double.compare((double) o1[1], (double) o2[1]);
     }
 }
 
@@ -161,5 +166,16 @@ class PlacesCounter {
         }
 
         return Place.getPlaceFromInt(index);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder res = new StringBuilder("{");
+
+        for (int i = 0; i < counters.length; i++) {
+            res.append(Place.getPlaceFromInt(i)).append("=").append(counters[i]).append(", ");
+        }
+
+        return res.append("}").toString();
     }
 }

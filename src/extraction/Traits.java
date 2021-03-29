@@ -67,8 +67,8 @@ public class Traits {
         return place;
     }
 
-    public int getTraitsAmount() {
-        return getClass().getDeclaredFields().length - 1;
+    public static int getTraitsAmount() {
+        return Traits.class.getClass().getDeclaredFields().length - 1;
     }
 
     @Override
