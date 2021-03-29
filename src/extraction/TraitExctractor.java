@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import java.lang.*;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,18 +14,6 @@ import static extraction.FileParser.parse;
 import static java.lang.Character.isLetter;
 
 public class TraitExctractor {
-    ArrayList<String[]> articlesData;
-
-    {
-        try {
-            articlesData = parse("C:/Users/Kamil/Downloads/KSR_Project_1-main/KSR_Project_1-main/articles/reut2-000.sgm");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    
 
     public static double calculateAverageWordLengthInArticle(String body) {
         String[] wordsNumber = body.split("\\s+");//counting number of words
@@ -157,13 +146,37 @@ public class TraitExctractor {
         return ch;
     }
 
+    public static List<Traits> getTraitsVectorFor(String pathname) {
+        ArrayList<String[]> articlesData;
 
+        try {
+            articlesData = parse("articles/reut2-000.sgm");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
 
+        List<Traits> res = new ArrayList<>();
 
+        for(String[] article: articlesData) {
+            String body = article[2];
 
+            res.add(new Traits(
+                    TheMostOccuringLetter(body),
+                    TheLeastOccuringLetter(body),
+                    calculateAverageWordLengthInArticle(body),
+                    wordsStartingWithUpperCase(body),
+                    numberOfDigits(body),
+                    numberOfPunctuation(body),
+                    numberOfWords(body),
+                    wordsShorterThan4(body),
+                    wordsLongerThan10(body),
+                    wordsWithOnlyUpperCase(body),
+                    Place.getPlaceFromString(article[1])
+            ));
+        }
 
-
-
-
+        return res;
+    }
 
 }

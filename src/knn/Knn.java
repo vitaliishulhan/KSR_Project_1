@@ -1,6 +1,7 @@
 package knn;
 
 import extraction.Place;
+import extraction.TraitExctractor;
 import extraction.Traits;
 import knn.exceptions.FilterDoesNotFitException;
 import knn.metrics.EuclidianMetric;
@@ -78,21 +79,20 @@ public class Knn {
     }
 
     public void classifyTestSet() {
-        
+
     }
 
 
     public static void main(String[] args) throws Exception {
 
-        List<Traits> data = new ArrayList<>();
+        List<Traits> data = TraitExctractor.getTraitsVectorFor("articles/reut2-000.sgm");
 
-        for (int i = 1; i < 200; i++) {
-            Traits vector = new Traits("a", "b",i,i,i,i,i,i,i,i, Place.WEST_GERMANY);
-            data.add(vector);
+        assert data != null;
+        for(Traits trait: data) {
+            System.out.println(trait);
         }
 
-
-        Knn knn = new Knn(data, 4, 30, new EuclidianMetric());
+//        Knn knn = new Knn(, 4, 30, new EuclidianMetric());
 
     }
 }

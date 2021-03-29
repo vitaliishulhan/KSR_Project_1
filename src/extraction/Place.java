@@ -46,4 +46,17 @@ public enum Place {
     public static int getPlacesAmount() {
         return Place.values().length;
     }
+
+    @Override
+    public String toString() {
+        return switch (value) {
+            case 0 -> "west-germany";
+            case 1 -> "usa";
+            case 2 -> "france";
+            case 3 -> "uk";
+            case 4 -> "canada";
+            case 5 -> "japan";
+            default -> "undefined";
+        };
+    }
 }
