@@ -2,18 +2,48 @@ package extraction;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 import java.lang.*;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static extraction.FileParser.parse;
 import static java.lang.Character.isLetter;
 
 public class TraitExctractor {
+    private static final List<Character> alfabet = new ArrayList<Character>();
+
+    static {
+        alfabet.add('a');
+        alfabet.add('b');
+        alfabet.add('c');
+        alfabet.add('d');
+        alfabet.add('e');
+        alfabet.add('f');
+        alfabet.add('g');
+        alfabet.add('h');
+        alfabet.add('i');
+        alfabet.add('g');
+        alfabet.add('k');
+        alfabet.add('l');
+        alfabet.add('m');
+        alfabet.add('n');
+        alfabet.add('o');
+        alfabet.add('p');
+        alfabet.add('q');
+        alfabet.add('r');
+        alfabet.add('s');
+        alfabet.add('t');
+        alfabet.add('u');
+        alfabet.add('w');
+        alfabet.add('q');
+        alfabet.add('x');
+        alfabet.add('y');
+        alfabet.add('z');
+    }
 
     public static double calculateAverageWordLengthInArticle(String body) {
         String[] wordsNumber = body.split("\\s+");//counting number of words
@@ -25,7 +55,7 @@ public class TraitExctractor {
             }
         }
 
-        double averageWordLenght = characterNumber/wordsNumber.length;
+        double averageWordLenght = 1.0*characterNumber/wordsNumber.length;
         return averageWordLenght;
     }
 
@@ -93,64 +123,38 @@ public class TraitExctractor {
         return count;
     }
 
-    private static char TheMostOccuringLetter(String body) {
+    private static char[] getTheLeastAndTheMostOccuringLetter(String body) {
 
-        String lowerCase=body.toLowerCase();
-        int[] ascii_count = new int[128];  // fast path for ASCII
+        String lowerCase = body.toLowerCase();
 
-        for (int i = 0 ; i < lowerCase.length() ; i++)
-        {
-            char ch = lowerCase.charAt(i);  // This does appear to be the recommended way to iterate over a String
-            // alternatively, iterate over 32bit Unicode codepoints, not UTF-16 chars, if that matters.
-            if (ch<=90 && ch>=65) {
-                ascii_count[ch]++;
+        int[] counter = new int[alfabet.size()];
+
+        for (int i = 0; i < lowerCase.length(); i++) {
+            int counterIndex = alfabet.indexOf(lowerCase.charAt(i));
+            if (counterIndex != -1) {
+                counter[counterIndex]++;
             }
         }
-        int temp=0;
-        char ch;
-        int Ascii = 0;
-        for (int i = 0 ; i < 25 ; i++)
-        {
-            if(temp<=ascii_count[65+i]){
-            temp=ascii_count[65+i];
-            Ascii=i+65;
-            }
-        }
-        ch= (char) Ascii;
-        return ch;
-    }
-    private static char TheLeastOccuringLetter(String body) {
 
-        String lowerCase=body.toLowerCase();
-        int[] ascii_count = new int[128];  // fast path for ASCII
+        List<Integer[]> counterList = new ArrayList<>();
 
-        for (int i = 0 ; i < lowerCase.length() ; i++)
-        {
-            char ch = lowerCase.charAt(i);  // This does appear to be the recommended way to iterate over a String
-            // alternatively, iterate over 32bit Unicode codepoints, not UTF-16 chars, if that matters.
-            if (ch<=90 && ch>=65) {
-                ascii_count[ch]++;
+        for (int i = 0; i < counter.length; i++) {
+            if (counter[i] != 0) {
+                counterList.add(new Integer[] {i, counter[i]});
             }
         }
-        int temp=ascii_count[65];
-        char ch;
-        int Ascii = 0;
-        for (int i = 0 ; i < 25 ; i++)
-        {
-            if(temp>=ascii_count[65+i]){
-                temp=ascii_count[65+i];
-                Ascii=i+65;
-            }
-        }
-        ch= (char) Ascii;
-        return ch;
+
+        return new char[] {
+                alfabet.get(counterList.stream().min(Comparator.comparingInt(o -> o[1])).get()[0]),
+                alfabet.get(counterList.stream().max(Comparator.comparingInt(o -> o[1])).get()[0])
+        };
     }
 
     public static List<Traits> getTraitsVectorFor(String pathname) {
         ArrayList<String[]> articlesData;
 
         try {
-            articlesData = parse("articles/reut2-000.sgm");
+            articlesData = parse(pathname);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -161,9 +165,11 @@ public class TraitExctractor {
         for(String[] article: articlesData) {
             String body = article[2];
 
+            char[] minMaxLetters = getTheLeastAndTheMostOccuringLetter(body);
+
             res.add(new Traits(
-                    TheMostOccuringLetter(body),
-                    TheLeastOccuringLetter(body),
+                    minMaxLetters[1],
+                    minMaxLetters[0],
                     calculateAverageWordLengthInArticle(body),
                     wordsStartingWithUpperCase(body),
                     numberOfDigits(body),
@@ -174,6 +180,7 @@ public class TraitExctractor {
                     wordsWithOnlyUpperCase(body),
                     Place.getPlaceFromString(article[1])
             ));
+
         }
 
         return res;

@@ -20,6 +20,7 @@ public class Knn {
 
     private final List<Traits> trainSet;
     private final List<Traits> testSet;
+    private final List<Place> testSetAssignedPlaces = new ArrayList<>();
     private final int k;
     private boolean[] filter;
 
@@ -34,6 +35,8 @@ public class Knn {
 
         this.metric = metric;
         placesCounter = new PlacesCounter();
+
+        setDefaultFilter();
     }
 
     public Knn(final List<Traits> data, final int k, final int trainSetRelation, final Metric metric, boolean[] filter) {
@@ -59,13 +62,32 @@ public class Knn {
         Arrays.fill(filter, true);
     }
 
+    private boolean isDefaultFilter() {
+        for(boolean condition: filter) {
+            if (!condition) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private Place classify(Traits obj) {
         placesCounter.reset();
 
         List<Object[]> distances = new ArrayList<>();
 
-        for (Traits trainSample: trainSet) {
-            distances.add(new Object[] {trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits())});
+        if(isDefaultFilter()) {
+            for (Traits trainSample : trainSet) {
+                distances.add(new Object[]{trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits())});
+            }
+        } else {
+            boolean[] numberFilter = new boolean[obj.getNumberTraits().size()];
+
+            System.arraycopy(filter, 0, numberFilter, 0, numberFilter.length);
+
+            for (Traits trainSample : trainSet) {
+                distances.add(new Object[]{trainSample, metric.getDistance(trainSample.getNumberTraits(), obj.getNumberTraits(), numberFilter)});
+            }
         }
 
         distances.sort(dc);
@@ -79,7 +101,11 @@ public class Knn {
     }
 
     public void classifyTestSet() {
+        testSetAssignedPlaces.clear();
 
+        for (Traits sample: testSet) {
+            testSetAssignedPlaces.add(classify(sample));
+        }
     }
 
 
@@ -88,6 +114,7 @@ public class Knn {
         List<Traits> data = TraitExctractor.getTraitsVectorFor("articles/reut2-000.sgm");
 
         assert data != null;
+
         for(Traits trait: data) {
             System.out.println(trait);
         }
