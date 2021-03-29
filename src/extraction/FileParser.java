@@ -43,6 +43,9 @@ public class FileParser {
             int reutersStartIndex = docTextStr.indexOf("<REUTERS");
             int reutersEndIndex = docTextStr.indexOf("</REUTERS>") + 10;
 
+            if (reutersStartIndex == -1)
+                break;
+
             // Get this article from document text
             String article = docTextStr.substring(reutersStartIndex, reutersEndIndex);
 

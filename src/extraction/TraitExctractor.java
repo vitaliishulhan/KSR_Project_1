@@ -136,6 +136,10 @@ public class TraitExctractor {
             }
         }
 
+        if (isEachZero(counter)) {
+            return new char[] {(char)0b11111111, (char)0b11111111};
+        }
+
         List<Integer[]> counterList = new ArrayList<>();
 
         for (int i = 0; i < counter.length; i++) {
@@ -148,6 +152,15 @@ public class TraitExctractor {
                 alfabet.get(counterList.stream().min(Comparator.comparingInt(o -> o[1])).get()[0]),
                 alfabet.get(counterList.stream().max(Comparator.comparingInt(o -> o[1])).get()[0])
         };
+    }
+
+    private static boolean isEachZero(int[] arr) {
+        for(int i: arr) {
+            if (i != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<Traits> getTraitsVectorFor(String pathname) {

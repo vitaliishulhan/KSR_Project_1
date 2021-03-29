@@ -6,10 +6,8 @@ import extraction.Traits;
 import knn.exceptions.FilterDoesNotFitException;
 import knn.metrics.EuclidianMetric;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 public class Knn {
 
@@ -100,6 +98,8 @@ public class Knn {
             placesCounter.incrementFor(place);
         }
 
+        System.out.println(placesCounter);
+
         return placesCounter.getMax();
     }
 
@@ -117,65 +117,5 @@ public class Knn {
 
     public List<Place> getTestSetAssignedPlaces() {
         return testSetAssignedPlaces;
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        List<Traits> data = TraitExctractor.getTraitsVectorFor("articles/reut2-000.sgm");
-
-        Knn knn = new Knn(data, 20, 30, new EuclidianMetric());
-
-        knn.classifyTestSet();
-
-        List<Traits> testSet = knn.getTestSet();
-        List<Place> assignedPlaces = knn.getTestSetAssignedPlaces();
-
-        for (int i = 0; i < testSet.size(); i++) {
-            System.out.println(testSet.get(i).getPlace() + " " + assignedPlaces.get(i));
-        }
-
-
-    }
-}
-
-class PlacesCounter {
-    private final int[] counters;
-
-    public PlacesCounter() {
-        counters = new int[Place.getPlacesAmount()];
-        reset();
-    }
-
-    public void reset() {
-        Arrays.fill(counters, 0);
-    }
-
-    public void incrementFor(Place place) {
-        counters[place.getValue()]++;
-    }
-
-    public Place getMax() {
-        int max = counters[0];
-        int index = 0;
-
-        for (int i = 1; i < counters.length; i++) {
-            if (counters[i] > max) {
-                max = counters[i];
-                index = i;
-            }
-        }
-
-        return Place.getPlaceFromInt(index);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder res = new StringBuilder("{");
-
-        for (int i = 0; i < counters.length; i++) {
-            res.append(Place.getPlaceFromInt(i)).append("=").append(counters[i]).append(", ");
-        }
-
-        return res.append("}").toString();
     }
 }
