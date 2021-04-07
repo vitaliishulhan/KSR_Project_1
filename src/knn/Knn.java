@@ -1,13 +1,14 @@
 package knn;
 
 import extraction.Place;
-import extraction.TraitExctractor;
 import extraction.Traits;
 import knn.exceptions.FilterDoesNotFitException;
-import knn.metrics.EuclidianMetric;
+import knn.metrics.Metric;
 
-import java.io.File;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Knn {
 
@@ -17,7 +18,7 @@ public class Knn {
 
     private final List<Traits> trainSet;
     private final List<Traits> testSet;
-    private final List<Place> testSetAssignedPlaces = new ArrayList<>();
+    private final HashMap<Traits, Place> assignedTextSet = new HashMap<>();
     private final int k;
     private boolean[] filter = new boolean[Traits.getTraitsAmount()];
 
@@ -98,16 +99,26 @@ public class Knn {
             placesCounter.incrementFor(place);
         }
 
-        System.out.println(placesCounter);
-
         return placesCounter.getMax();
     }
 
     public void classifyTestSet() {
-        testSetAssignedPlaces.clear();
+        assignedTextSet.clear();
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        List<Callable<Object>> tasks = new ArrayList<>();
 
         for (Traits sample: testSet) {
-            testSetAssignedPlaces.add(classify(sample));
+            tasks.add(() -> assignedTextSet.put(sample, classify(sample)));
+        }
+
+        try {
+            executor.invokeAll(tasks);
+            executor.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -115,7 +126,7 @@ public class Knn {
         return testSet;
     }
 
-    public List<Place> getTestSetAssignedPlaces() {
-        return testSetAssignedPlaces;
+    public HashMap<Traits, Place> getAssignedTextSet() {
+        return assignedTextSet;
     }
 }

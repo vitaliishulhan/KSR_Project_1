@@ -1,4 +1,4 @@
-package knn;
+package knn.metrics;
 
 import java.util.List;
 

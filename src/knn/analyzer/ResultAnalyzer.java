@@ -1,4 +1,4 @@
-package knn;
+package knn.analyzer;
 
 import extraction.Place;
 import extraction.Traits;
