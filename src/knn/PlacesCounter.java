@@ -8,7 +8,7 @@ public class PlacesCounter {
     private final int[] counters;
 
     public PlacesCounter() {
-        counters = new int[Place.getPlacesAmount()];
+        counters = new int[Place.getPlacesAmount() - 1];
         reset();
     }
 
@@ -42,6 +42,6 @@ public class PlacesCounter {
             res.append(Place.getPlaceFromInt(i)).append("=").append(counters[i]).append(", ");
         }
 
-        return res.append("}").toString();
+        return res.delete(res.length()-2, res.length()).append("}").toString();
     }
 }

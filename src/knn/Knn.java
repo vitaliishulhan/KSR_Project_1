@@ -3,6 +3,7 @@ package knn;
 import extraction.Place;
 import extraction.Traits;
 import knn.exceptions.FilterDoesNotFitException;
+import knn.metrics.EuclidianMetric;
 import knn.metrics.Metric;
 
 import java.util.*;
@@ -14,46 +15,52 @@ public class Knn {
 
     private final PlacesCounter placesCounter;
 
-    private final Metric metric;
+    private Metric metric;
 
-    private final List<Traits> trainSet;
-    private final List<Traits> testSet;
+    private List<Traits> data;
+    private List<Traits> trainSet;
+    private List<Traits> testSet;
     private final HashMap<Traits, Place> assignedTextSet = new HashMap<>();
-    private final int k;
-    private boolean[] filter = new boolean[Traits.getTraitsAmount()];
+    private int k;
+    private boolean[] filter;
+    private int trainSetRelation;
 
-    public Knn(final List<Traits> data, final int k, final int trainSetRelation, final Metric metric) {
+    public void setSetRelation(int trainSetRelation) {
+        this.trainSetRelation = trainSetRelation <= 0 || trainSetRelation >= 100 ? 50 : trainSetRelation;
+
         int divider = trainSetRelation <= 0 || trainSetRelation >= 100 ?
                 data.size() / 2 :
                 data.size() * trainSetRelation / 100;
 
         trainSet = data.subList(0, divider);
         testSet = data.subList(divider, data.size());
-        this.k = k;
-
-        this.metric = metric;
-        placesCounter = new PlacesCounter();
-
-        setDefaultFilter();
     }
 
-    public Knn(final List<Traits> data, final int k, final int trainSetRelation, final Metric metric, boolean[] filter) {
-        this(data, k, trainSetRelation, metric);
+    public void setData(final List<Traits> data) {
+        this.data = data;
 
-        try {
-            changeFilter(filter);
-        } catch (FilterDoesNotFitException e) {
-            System.out.println(e);
-            System.out.println("Set default filter");
+        setSetRelation(trainSetRelation);
+    }
+
+    public void setMetric(Metric metric) {
+        this.metric = metric;
+    }
+
+    public void setK(int k) {
+        this.k = k;
+    }
+
+    public Knn() {
+        placesCounter = new PlacesCounter();
+    }
+
+    public void setFilter(boolean[] newFilter) {
+        if (newFilter.length != 10) {
             setDefaultFilter();
         }
-    }
-
-    public void changeFilter(boolean[] newFilter) throws FilterDoesNotFitException {
-        if (newFilter.length != trainSet.get(0).getTraitsAmount())
-            throw new FilterDoesNotFitException("Filter length and traits amount are not the same");
-
-        filter = newFilter;
+        else {
+            filter = newFilter;
+        }
     }
 
     public void setDefaultFilter() {
