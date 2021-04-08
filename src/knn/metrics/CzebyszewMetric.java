@@ -6,6 +6,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Implements Czebyszew's Metric, where distance between two vectors is equal to:
+ *
+ * d_cz(x,y) = from i=1 to n [ max(abs(y_i - x_i)) ])
+ *
+ * where x and y are values vectors
+ *
+ * @see knn.metrics.Metric
+ */
 public class CzebyszewMetric implements Metric {
     @Override
     public double getDistance(List<Double> v1, List<Double> v2, List<Character> c1, List<Character> c2) {

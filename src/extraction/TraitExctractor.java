@@ -1,93 +1,131 @@
 package extraction;
 
-
 import java.io.IOException;
+
 import java.util.*;
-
-import java.lang.*;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static extraction.FileParser.parse;
 import static java.lang.Character.isLetter;
 
+/**
+ * Implements traits extractor for articles
+ */
 public class TraitExctractor {
-    private static final List<Character> alfabet = new ArrayList<Character>();
+    /**
+     * Alphabet representation
+     */
+    private static final List<Character> alphabet = new ArrayList<>();
 
+    // alphabet initialization
     static {
-        alfabet.add('a');
-        alfabet.add('b');
-        alfabet.add('c');
-        alfabet.add('d');
-        alfabet.add('e');
-        alfabet.add('f');
-        alfabet.add('g');
-        alfabet.add('h');
-        alfabet.add('i');
-        alfabet.add('g');
-        alfabet.add('k');
-        alfabet.add('l');
-        alfabet.add('m');
-        alfabet.add('n');
-        alfabet.add('o');
-        alfabet.add('p');
-        alfabet.add('q');
-        alfabet.add('r');
-        alfabet.add('s');
-        alfabet.add('t');
-        alfabet.add('u');
-        alfabet.add('w');
-        alfabet.add('q');
-        alfabet.add('x');
-        alfabet.add('y');
-        alfabet.add('z');
+        alphabet.add('a');
+        alphabet.add('b');
+        alphabet.add('c');
+        alphabet.add('d');
+        alphabet.add('e');
+        alphabet.add('f');
+        alphabet.add('g');
+        alphabet.add('h');
+        alphabet.add('i');
+        alphabet.add('g');
+        alphabet.add('k');
+        alphabet.add('l');
+        alphabet.add('m');
+        alphabet.add('n');
+        alphabet.add('o');
+        alphabet.add('p');
+        alphabet.add('q');
+        alphabet.add('r');
+        alphabet.add('s');
+        alphabet.add('t');
+        alphabet.add('u');
+        alphabet.add('w');
+        alphabet.add('q');
+        alphabet.add('x');
+        alphabet.add('y');
+        alphabet.add('z');
     }
 
-    public static double calculateAverageWordLengthInArticle(String body) {
-        String[] wordsNumber = body.split("\\s+");//counting number of words
-        int characterNumber=0;
-        for( int i = 0; i < body.length( ); i++ )
-        { boolean isChar=isLetter(body.charAt(i));
-            if (isChar) {
+    /**
+     * Returns average word length
+     * @param body article text
+     * @return average word length
+     */
+    private static double getAverageWordLength(String body) {
+        int characterNumber = 0;
+
+        //counts letters in the article text
+        for (int i = 0; i < body.length( ); i++ ) {
+            if (isLetter(body.charAt(i))) {
                 characterNumber++;
             }
         }
 
-        double averageWordLenght = 1.0*characterNumber/wordsNumber.length;
-        return averageWordLenght;
+        return 1.0 * characterNumber / body.split("\\s+").length;
     }
 
-
-    private  static int wordsStartingWithUpperCase(String body){
+    /**
+     * Returns amount of words with only upper case letters
+     * @param body article text
+     * @return amount of words
+     */
+    private static int getUpperCaseWordsAmount(String body){
         int count = 0;
+
         Pattern patternObject = Pattern.compile("[A-Z][a-z]");
         Matcher matcher = patternObject.matcher(body);
-        while(matcher.find()){
+
+        while (matcher.find()) {
             count++;
         }
-        return  count;
+
+        return count;
     }
-    private static int wordsWithOnlyUpperCase(String body) {
+
+    /**
+     * Returns amount of words with only lower case letters
+     * @param body article text
+     * @return amount of words
+     */
+    private static int getLowerCaseWordsAmount(String body) {
         int count = 0;
+
         Pattern p = Pattern.compile("\\b[A-Z]{4,}\\b");
         Matcher m = p.matcher(body);
+
         while (m.find()) {
             count++;
         }
+
         return count;
     }
-    private static int wordsLongerThan10(String body) {
+
+    /**
+     * Returns amount of words containing more than 10 characters
+     * @param body article text
+     * @return amount of words
+     */
+    private static int getWordsLongerThan10(String body) {
         int count = 0;
+
         Pattern p = Pattern.compile("^\\w{10,}$");
         Matcher m = p.matcher(body);
+
         while (m.find()) {
             count++;
         }
+
         return count;
     }
-    private static int wordsShorterThan4(String body) {
+
+    /**
+     * Returns amount of words containing less than 4 characters
+     * @param body article text
+     * @return amount of words
+     */
+    private static int getWordsShorterThan4(String body) {
         int count = 0;
         Pattern p = Pattern.compile("\\b\\w{1,4}\\b");
         Matcher m = p.matcher(body);
@@ -96,22 +134,47 @@ public class TraitExctractor {
         }
         return count;
     }
-    private static int numberOfWords(String body) {
+
+    /**
+     * Returns words amount
+     * @param body article text
+     * @return amount of words
+     */
+    private static int getWordsAmount(String body) {
         int count = 0;
+
         Pattern p = Pattern.compile("\\s+");
         Matcher m = p.matcher(body);
+
         while (m.find()) {
             count++;
         }
+
         return count;
     }
-    private static int numberOfDigits(String body) {
+
+    /**
+     * Returns digits amount, i.e. characters between 0 and 9
+     * @param body article text
+     * @return digits amount
+     */
+    private static int getDigitsAmount(String body) {
         int count = 0;
+
         for (int i = 0; i < body.length(); i++) {
-            if (Character.isDigit(body.charAt(i))) count++;
+            if (Character.isDigit(body.charAt(i))) {
+                count++;
+            }
         }
+
         return count;
     }
+
+    /**
+     * Returns amount of punctuation marks
+     * @param body article text
+     * @return amount of punctuation marks
+     */
     private static int numberOfPunctuation(String body){
         int count = 0;
         Pattern p = Pattern.compile("[\\p{Punct}]");
@@ -123,14 +186,19 @@ public class TraitExctractor {
         return count;
     }
 
-    private static char[] getTheLeastAndTheMostOccuringLetter(String body) {
+    /**
+     * Returns 2-element table with the least and the most occurring letter correspondingly
+     * @param body article text
+     * @return the least and the most occurring letter correspondingly
+     */
+    private static char[] getTheLeastAndTheMostOccurringLetter(String body) {
 
         String lowerCase = body.toLowerCase();
 
-        int[] counter = new int[alfabet.size()];
+        int[] counter = new int[alphabet.size()];
 
         for (int i = 0; i < lowerCase.length(); i++) {
-            int counterIndex = alfabet.indexOf(lowerCase.charAt(i));
+            int counterIndex = alphabet.indexOf(lowerCase.charAt(i));
             if (counterIndex != -1) {
                 counter[counterIndex]++;
             }
@@ -149,11 +217,16 @@ public class TraitExctractor {
         }
 
         return new char[] {
-                alfabet.get(counterList.stream().min(Comparator.comparingInt(o -> o[1])).get()[0]),
-                alfabet.get(counterList.stream().max(Comparator.comparingInt(o -> o[1])).get()[0])
+                alphabet.get(counterList.stream().min(Comparator.comparingInt(o -> o[1])).get()[0]),
+                alphabet.get(counterList.stream().max(Comparator.comparingInt(o -> o[1])).get()[0])
         };
     }
 
+    /**
+     * Verifies if each element of int table is 0
+     * @param arr table for verification
+     * @return if each element of given table is zero
+     */
     private static boolean isEachZero(int[] arr) {
         for(int i: arr) {
             if (i != 0) {
@@ -163,6 +236,11 @@ public class TraitExctractor {
         return true;
     }
 
+    /**
+     * Extracts traits from articles of the given file
+     * @param pathname path to the file
+     * @return list of the traits vector for each article from the given file
+     */
     public static List<Traits> getTraitsVectorFor(String pathname) {
         ArrayList<String[]> articlesData;
 
@@ -178,19 +256,19 @@ public class TraitExctractor {
         for(String[] article: articlesData) {
             String body = article[2];
 
-            char[] minMaxLetters = getTheLeastAndTheMostOccuringLetter(body);
+            char[] minMaxLetters = getTheLeastAndTheMostOccurringLetter(body);
 
             res.add(new Traits(
                     minMaxLetters[1],
                     minMaxLetters[0],
-                    calculateAverageWordLengthInArticle(body),
-                    wordsStartingWithUpperCase(body),
-                    numberOfDigits(body),
+                    getAverageWordLength(body),
+                    getUpperCaseWordsAmount(body),
+                    getDigitsAmount(body),
                     numberOfPunctuation(body),
-                    numberOfWords(body),
-                    wordsShorterThan4(body),
-                    wordsLongerThan10(body),
-                    wordsWithOnlyUpperCase(body),
+                    getWordsAmount(body),
+                    getWordsShorterThan4(body),
+                    getWordsLongerThan10(body),
+                    getLowerCaseWordsAmount(body),
                     Place.getPlaceFromString(article[1])
             ));
 
@@ -198,5 +276,4 @@ public class TraitExctractor {
 
         return res;
     }
-
 }

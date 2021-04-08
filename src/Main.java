@@ -6,7 +6,7 @@ import knn.Knn;
 import knn.PlacesCounter;
 import knn.analyzer.Assignments;
 import knn.metrics.CzebyszewMetric;
-import knn.metrics.EuclidianMetric;
+import knn.metrics.EuclideanMetric;
 import knn.metrics.ManhattanMetric;
 import knn.metrics.Metric;
 
@@ -15,14 +15,42 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * Implements logic of the program, combines gui and algorithm
+ *
+ * @see extraction.FileParser
+ * @see extraction.TraitExctractor
+ * @see gui.GUI
+ */
 public class Main {
+    /**
+     * GUI object
+     */
     private final GUI gui;
+
+    /**
+     * Object of knn algorithm
+     */
     private final Knn knn;
 
-    private final EuclidianMetric EUCLIDIAN_METRIC = new EuclidianMetric();
-    private final ManhattanMetric MANHATTAN_METRIC = new ManhattanMetric();
-    private final CzebyszewMetric CZEBYSHEW_METRIC = new CzebyszewMetric();
+    /**
+     * Constant object of metric for using by knn
+     */
+    private final Metric EUCLIDEAN_METRIC = new EuclideanMetric();
+    /**
+     * Constant object of metric for using by knn
+     */
+    private final Metric MANHATTAN_METRIC = new ManhattanMetric();
+    /**
+     * Constant object of metric for using by knn
+     */
+    private final Metric CZEBYSHEW_METRIC = new CzebyszewMetric();
 
+
+    /**
+     * A single constructor, initializes gui object and listener for load and submit buttons
+     * @param gui GUI object for graphical representing of program
+     */
     public Main(GUI gui) {
         this.gui = gui;
         this.gui.setVisible(true);
@@ -32,6 +60,9 @@ public class Main {
         knn = new Knn();
     }
 
+    /**
+     * Gets data from articles folder and send it to knn
+     */
     private void getData() {
         List<Traits> data = new ArrayList<>();
 
@@ -76,29 +107,37 @@ public class Main {
         gui.submitButton.setEnabled(true);
     }
 
+    /**
+     * Takes parameters from corresponding text fields, set them into knn algorithm and execute classification
+     * Output will be showed in the corresponding text area.
+     */
     private void generate() {
+        //Take params
         int k = (int) gui.kValueSpinner.getValue();
         int trainSetRelation = (int) gui.trainSetRelationSpinner.getValue();
         boolean[] filter = gui.getTraitsFilter();
         Metric metric;
 
-
-
+        // try to convert metric into ojbect
         try {
             metric = convertMetricIndexFromGui();
             knn.setMetric(metric);
         } catch (IllegalStateException e) {
+            // else take euclidean metric
             gui.println("BŁĄD! Wybrana została metryka eukidesowa");
             gui.println(e);
-            metric = EUCLIDIAN_METRIC;
+            metric = EUCLIDEAN_METRIC;
         }
 
+        // Set params
         knn.setK(k);
         knn.setSetRelation(trainSetRelation);
         knn.setFilter(filter);
         knn.setMetric(metric);
 
-        gui.println("\nClassifying...");
+        // Send information about classifying params to output
+        gui.println("\n~~~Classifying...");
+        gui.println("PARAMETERS:");
         gui.println("k = " + k);
         gui.println("train set percentage = " + trainSetRelation + "%");
         gui.println("Metric: " + metric.getClass().getName().substring(12));
@@ -115,12 +154,14 @@ public class Main {
         gui.println("the least common letter: " + filter[9]);
 
         knn.classifyTestSet();
-        Assignments assignments = new Assignments();
 
-        gui.println("\nAnalyzing...");
+        // Execute analyzing algorithm
+        Assignments assignments = new Assignments();
+        gui.println("\n~~~Analyzing...");
         assignments.calculateFor(knn.getAssignedTextSet());
 
-        gui.println("\nRESULTS:");
+        //Show results
+        gui.println("\n~~~RESULTS:");
         for (Map.Entry<Place, Double[]> entry: assignments.getAll().entrySet()) {
             gui.println("Place: " + entry.getKey().toString());
             Double[] params = entry.getValue();
@@ -131,16 +172,26 @@ public class Main {
         }
     }
 
+    /**
+     * Converts active index in metric combobox into corresponding Metric object
+     * @return Metric object
+     *
+     * @see knn.metrics.Metric
+     */
     private Metric convertMetricIndexFromGui() {
         return switch (gui.metricComboBox.getSelectedIndex()) {
-            case 0 -> EUCLIDIAN_METRIC;
+            case 0 -> EUCLIDEAN_METRIC;
             case 1 -> MANHATTAN_METRIC;
             case 2 -> CZEBYSHEW_METRIC;
             default -> throw new IllegalStateException("Unexpected value: " + gui.metricComboBox.getSelectedIndex());
         };
     }
 
-
+    /**
+     * Program start point
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         Main main = new Main(new GUI("KSR_LAB_PROJECT_No_1"));
     }

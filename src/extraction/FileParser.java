@@ -3,7 +3,9 @@ package extraction;
 import java.io.*;
 import java.util.ArrayList;
 
-
+/**
+ * Class of the articles parser. Offers methods for extracting articles from particular sgml files
+ */
 public class FileParser {
 
     /**
@@ -135,7 +137,7 @@ public class FileParser {
     }
 
     /**
-     * This function is used for getting information about how many D elements are in the PLACES element
+     * It's used for getting information about how many D elements are in the PLACES element
      * @param places content of the PLACES element in the string representation
      * @return amount of the D elements
      */

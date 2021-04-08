@@ -1,5 +1,8 @@
 package extraction;
 
+/**
+ * Numerical representation of the countries for classification
+ */
 public enum Place {
     WEST_GERMANY(0),
     USA(1),
@@ -9,16 +12,32 @@ public enum Place {
     JAPAN(5),
     UNDEFINED(-1);
 
+    /**
+     * Numerical value of country
+     */
     private final int value;
 
+    /**
+     * Private constructor for numerical representation
+     * @param value numerical representation of country
+     */
     Place(int value) {
         this.value = value;
     }
 
+    /**
+     * value getter
+     * @return numerical representation of country
+     */
     public int getValue() {
         return value;
     }
 
+    /**
+     * gets place due to numerical value
+     * @param value numerical representation of country
+     * @return enum object representating country
+     */
     public static Place getPlaceFromInt(int value) {
         return switch (value) {
             case 0 -> WEST_GERMANY;
@@ -31,6 +50,11 @@ public enum Place {
         };
     }
 
+    /**
+     * gets place due to name (it's used while articles parsing)
+     * @param place country name
+     * @return enum object representating country
+     */
     public static Place getPlaceFromString(String place) {
         return switch (place) {
             case "west-germany" -> WEST_GERMANY;
@@ -43,10 +67,18 @@ public enum Place {
         };
     }
 
+    /**
+     * Returns country amount which is classifiable
+     * @return country amount
+     */
     public static int getPlacesAmount() {
         return Place.values().length;
     }
 
+    /**
+     * Returns country name
+     * @return country name
+     */
     @Override
     public String toString() {
         return switch (value) {

@@ -4,22 +4,49 @@ import extraction.Place;
 
 import java.util.Arrays;
 
+/**
+ * Data structure for counting how many articles of the particular country are
+ *
+ * @see extraction.Place
+ */
 public class PlacesCounter {
+    /**
+     * Table for counting of articles according to country
+     */
     private final int[] counters;
 
+    /**
+     * A single constructor. Initializes counting table for country from Place enum
+     *
+     * @see extraction.Place
+     */
     public PlacesCounter() {
         counters = new int[Place.getPlacesAmount() - 1];
         reset();
     }
 
+    /**
+     * Set all integers in the table to 0
+     *
+     */
     public void reset() {
         Arrays.fill(counters, 0);
     }
 
+    /**
+     * Increment counter of the given country
+     *
+     * @param place country representation
+     */
     public void incrementFor(Place place) {
         counters[place.getValue()]++;
     }
 
+    /**
+     * Returns place, which has the biggest counter
+     *
+     * @return country with the biggest counter
+     */
     public Place getMax() {
         int max = counters[0];
         int index = 0;

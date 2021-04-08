@@ -4,6 +4,16 @@ import knn.HammingDistance;
 
 import java.util.List;
 
+
+/**
+ * Implements Manhattan Metric, where distance between two vectors is equal to:
+ *
+ * d_m(x,y) = from i=1 to n [ sum(abs(y_i - x_i)) ]
+ *
+ * where x and y are values vectors
+ *
+ * @see knn.metrics.Metric
+ */
 public class ManhattanMetric implements Metric {
     @Override
     public double getDistance(List<Double> v1, List<Double> v2, List<Character> c1, List<Character> c2) {
