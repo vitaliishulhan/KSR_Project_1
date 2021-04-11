@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * Data structure for counting how many articles of the particular country are
  *
- * @see extraction.Place
+ * @see Place
  */
 public class PlacesCounter {
     /**
@@ -18,7 +18,7 @@ public class PlacesCounter {
     /**
      * A single constructor. Initializes counting table for country from Place enum
      *
-     * @see extraction.Place
+     * @see Place
      */
     public PlacesCounter() {
         counters = new int[Place.getPlacesAmount() - 1];

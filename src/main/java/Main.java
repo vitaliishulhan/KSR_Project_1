@@ -9,6 +9,7 @@ import knn.metrics.CzebyszewMetric;
 import knn.metrics.EuclideanMetric;
 import knn.metrics.ManhattanMetric;
 import knn.metrics.Metric;
+import extraction.FileParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +17,11 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Implements logic of the program, combines gui and algorithm
+ * Implements logic of the program, combines main.gui and algorithm
  *
- * @see extraction.FileParser
- * @see extraction.TraitExctractor
- * @see gui.GUI
+ * @see FileParser
+ * @see TraitExctractor
+ * @see GUI
  */
 public class Main {
     /**
@@ -29,26 +30,26 @@ public class Main {
     private final GUI gui;
 
     /**
-     * Object of knn algorithm
+     * Object of main.knn algorithm
      */
     private final Knn knn;
 
     /**
-     * Constant object of metric for using by knn
+     * Constant object of metric for using by main.knn
      */
     private final Metric EUCLIDEAN_METRIC = new EuclideanMetric();
     /**
-     * Constant object of metric for using by knn
+     * Constant object of metric for using by main.knn
      */
     private final Metric MANHATTAN_METRIC = new ManhattanMetric();
     /**
-     * Constant object of metric for using by knn
+     * Constant object of metric for using by main.knn
      */
     private final Metric CZEBYSHEW_METRIC = new CzebyszewMetric();
 
 
     /**
-     * A single constructor, initializes gui object and listener for load and submit buttons
+     * A single constructor, initializes main.gui object and listener for load and submit buttons
      * @param gui GUI object for graphical representing of program
      */
     public Main(GUI gui) {
@@ -61,7 +62,7 @@ public class Main {
     }
 
     /**
-     * Gets data from articles folder and send it to knn
+     * Gets data from articles folder and send it to main.knn
      */
     private void getData() {
         List<Traits> data = new ArrayList<>();
@@ -87,28 +88,47 @@ public class Main {
             try {
                 data.addAll(fut.get());
             } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
                 gui.println(e);
             }
         }
 
         executor.shutdown();
 
+
         Collections.shuffle(data);
 
         PlacesCounter placesCounter = new PlacesCounter();
 
+        ArrayList<Traits> filteredData = new ArrayList<>();
+        int usaCounter = 0;
+
         for (Traits sample: data) {
+            if (sample.getPlace() == Place.USA) {
+                if (usaCounter < 2000) {
+                    filteredData.add(sample);
+                    usaCounter++;
+                }
+            } else {
+                filteredData.add(sample);
+            }
+        }
+
+        for (Traits sample: filteredData) {
             placesCounter.incrementFor(sample.getPlace());
         }
 
         gui.println("Number of articles according to country:");
         gui.println(placesCounter);
-        knn.setData(data);
+
+        Collections.shuffle(filteredData);
+
+        knn.setData(filteredData);
         gui.submitButton.setEnabled(true);
     }
 
     /**
-     * Takes parameters from corresponding text fields, set them into knn algorithm and execute classification
+     * Takes parameters from corresponding text fields, set them into main.knn algorithm and execute classification
      * Output will be showed in the corresponding text area.
      */
     private void generate() {
@@ -140,7 +160,7 @@ public class Main {
         gui.println("PARAMETERS:");
         gui.println("k = " + k);
         gui.println("train set percentage = " + trainSetRelation + "%");
-        gui.println("Metric: " + metric.getClass().getName().substring(12));
+        gui.println("Metric: " + metric.getClass().getName().substring(17));
         gui.println("Filter:");
         gui.println("avg word length: " + filter[0]);
         gui.println("words with first big letter: " + filter[1]);
@@ -158,6 +178,7 @@ public class Main {
         // Execute analyzing algorithm
         Assignments assignments = new Assignments();
         gui.println("\n~~~Analyzing...");
+
         assignments.calculateFor(knn.getAssignedTextSet());
 
         //Show results

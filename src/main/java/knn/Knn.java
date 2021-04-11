@@ -5,9 +5,6 @@ import extraction.Traits;
 import knn.metrics.Metric;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Knn {
 
@@ -174,14 +171,15 @@ public class Knn {
             }
         }
 
-        // sort distances descending
+        // sort distances ascending
         distances.sort(Comparator.comparingDouble(o -> (double) o[1]));
 
         // for the first k samples count their countries
         for (int i = 0; i < k; i++) {
-            Place place = ((Traits)distances.get(i)[0]).getPlace();
+            Place place = ((Traits) distances.get(i)[0]).getPlace();
             placesCounter.incrementFor(place);
         }
+
 
         // get result
         return placesCounter.getMax();
@@ -192,27 +190,13 @@ public class Knn {
      *
      */
     public void classifyTestSet() {
+        List<Integer> v = new ArrayList<>();
+
         // clear previous results storing in the hash map
         assignedTextSet.clear();
 
-        // use threads for more quickly calculating
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-
-        List<Callable<Object>> tasks = new ArrayList<>();
-
         for (Traits sample: testSet) {
-            // store store sample and assigned country
-            tasks.add(() -> assignedTextSet.put(sample, classify(sample)));
-        }
-
-        try {
-            // execute all and shut down the executor service
-            executor.invokeAll(tasks);
-            executor.shutdown();
-        } catch (InterruptedException e) {
-            // else get information about error and shut down program
-            e.printStackTrace();
-            System.exit(1);
+            assignedTextSet.put(sample, classify(sample));
         }
     }
 

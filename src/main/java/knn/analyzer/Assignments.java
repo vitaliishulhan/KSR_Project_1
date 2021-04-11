@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 /**
  * Repo of all assignment, i.e. for each country from Place enum
  *
- * @see extraction.Place
+ * @see Place
  */
 public class Assignments {
     /**
@@ -93,6 +93,8 @@ public class Assignments {
             res.put(assignment.getPlace(), params);
         }
 
+
+
         return res;
     }
 }
@@ -143,6 +145,7 @@ class Assignment {
      * @see knn.Knn
      */
     public void calculateFor(HashMap<Traits, Place> assignedSet) {
+
         for(Entry<Traits, Place> entry : assignedSet.entrySet()) {
             Place realPlace = entry.getKey().getPlace();
             Place assignedPlace = entry.getValue();
@@ -154,21 +157,25 @@ class Assignment {
                     // so, it's true positive
                     tp++;
                 } else {
-                    // else, it's false positive
-                    fp++;
+                    // else, it's false negative
+                    fn++;
                 }
                 // real class is negative
             } else {
-                // assigned class is negative
+                // assigned class is positive
                 if (assignedPlace == place) {
-                    // so, it's true negative
-                    fn++;
+                    // so, it's false negative
+                    fp++;
                 } else {
-                    // else, it's false negative
+                    // else, it's true negative
                     tn++;
                 }
             }
         }
+        System.out.println("TP: " + tp);
+        System.out.println("FP: " + fp);
+        System.out.println("FN: " + fn);
+        System.out.println("TN: " + tn);
     }
 
     /**
@@ -197,6 +204,8 @@ class Assignment {
      * @return precision for given country
      */
     public double getPresicion() {
+        if (tp == 0) return 0;
+
         return 1.0 * tp / (tp + fp);
     }
 
@@ -207,6 +216,8 @@ class Assignment {
      * @return recall for given country
      */
     public double getRecall() {
+        if (tp == 0) return 0;
+
         return 1.0 * tp / (tp + fn);
     }
 
@@ -220,6 +231,12 @@ class Assignment {
         double precision = getPresicion();
         double recall = getRecall();
 
+        if (precision == 0 || recall == 0) return 0;
+
         return (2.0 * precision * recall) / (precision + recall);
+    }
+
+    public int[] getMistakesMatrix() {
+        return new int[] {tp, tn, fp, fn};
     }
 }

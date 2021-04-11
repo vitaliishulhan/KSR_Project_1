@@ -2,6 +2,7 @@ package extraction;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Class of the articles parser. Offers methods for extracting articles from particular sgml files
@@ -18,7 +19,7 @@ public class FileParser {
     public static ArrayList<String[]> parse(String pathname) throws IOException {
 
         // Create buffered input stream for the given file
-        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(pathname)), 1024);
+        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(pathname), 1024);
 
         // String builder for easy manipulation on document text
         StringBuilder docText = new StringBuilder();
@@ -34,6 +35,7 @@ public class FileParser {
         // Collection for saving article data after parsing
         ArrayList<String[]> articlesData = new ArrayList<>();
 
+        ArrayList<Integer> franceids = new ArrayList<>();
         // Loop for extracting data from articles
         // Since document text is cutted after each iteration, its length is condition to stop
         while (docText.length() != 0) {
@@ -57,6 +59,9 @@ public class FileParser {
             // if article is not out of all conditions, add it to the collection
             if (articleData != null) {
                 articlesData.add(articleData);
+                if (articleData[1].equals("france")) {
+                   franceids.add(Integer.valueOf(articleData[0]));
+                }
             }
 
             // Delete this article from the document text
@@ -99,7 +104,7 @@ public class FileParser {
         String place = DAmount == 0 ? placesTagStr : placesTagStr.substring(3, placesTagStr.length() - 4);
 
         // If given country is not one of the written below or PLACES element is empty, article is out of condition
-        if (!"west-germany,usa,france,uk,canada,japan".contains(place) || place.length() == 0)
+        if (!"west-germany,usa,france,uk,canada,japan".contains(place) || place.length() == 0) //TODO usa is missing!
             return null;
 
         // Take  BODY element start and end index in the article string representation
@@ -131,9 +136,15 @@ public class FileParser {
         }
 
         // Take article body
-        String body = mutableArticleStr.substring(bodyStartIndex, bodyEndIndex);
+        String body = mutableArticleStr.substring(bodyStartIndex, bodyEndIndex-4);
 
-        return new String[] {id, place, body};
+        String title = "";
+
+        try {
+            title = article.substring(getIndexAfter(article, "<TITLE>"), article.indexOf("</TITLE>"));
+        } catch (StringIndexOutOfBoundsException ignored) {}
+
+        return new String[] {id, place, title + '\n' + body};
     }
 
     /**

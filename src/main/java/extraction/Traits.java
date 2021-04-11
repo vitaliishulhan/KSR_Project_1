@@ -7,6 +7,7 @@ import java.util.List;
  * Data structure for saving article's traits
  */
 public class Traits {
+    private final int id;
     /**
      * The most common letter which occurs in article
      */
@@ -66,17 +67,20 @@ public class Traits {
      * @param upperCaseWordsAmount Amount of words containing only upper case letters
      * @param place Country representation, which article belongs to
      */
-    public Traits(final char theMostCommonLetter,
-                  final char theLeastCommonLetter,
-                  final double avgWordLength,
-                  final double wordsWithTheFirstBigLetterAmount,
-                  final double digitsAmount,
-                  final double punctuationMarksAmount,
-                  final double wordsAmount,
-                  final double wordsMax4LettersAmount,
-                  final double wordsMin11LettersAmount,
-                  final double upperCaseWordsAmount,
-                  final Place place) {
+    public Traits(
+            final int id,
+            final char theMostCommonLetter,
+            final char theLeastCommonLetter,
+            final double avgWordLength,
+            final double wordsWithTheFirstBigLetterAmount,
+            final double digitsAmount,
+            final double punctuationMarksAmount,
+            final double wordsAmount,
+            final double wordsMax4LettersAmount,
+            final double wordsMin11LettersAmount,
+            final double upperCaseWordsAmount,
+            final Place place) {
+        this.id = id;
         this.theMostCommonLetter = theMostCommonLetter;
         this.theLeastCommonLetter= theLeastCommonLetter;
         this.avgWordLength = avgWordLength;
@@ -88,6 +92,10 @@ public class Traits {
         this.wordsMin11LettersAmount = wordsMin11LettersAmount;
         this.upperCaseWordsAmount = upperCaseWordsAmount;
         this.place = place;
+    }
+
+    public int getId() {
+        return id;
     }
 
     /**
@@ -134,12 +142,13 @@ public class Traits {
      * @return amount of article traits
      */
     public static int getTraitsAmount() {
-        return Traits.class.getClass().getDeclaredFields().length - 1;
+        return Traits.class.getClass().getDeclaredFields().length - 2;
     }
 
     @Override
     public String toString() {
         return "Traits{" +
+                "id=" + id +
                 "theMostCommonLetter=" + theMostCommonLetter +
                 ", theLeastCommonLetter=" + theLeastCommonLetter +
                 ", avgWordLength=" + avgWordLength +

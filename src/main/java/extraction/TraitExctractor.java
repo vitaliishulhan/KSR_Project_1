@@ -1,13 +1,14 @@
 package extraction;
 
 import java.io.IOException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static extraction.FileParser.parse;
 import static java.lang.Character.isLetter;
+import static extraction.FileParser.parse;
 
 /**
  * Implements traits extractor for articles
@@ -56,8 +57,10 @@ public class TraitExctractor {
     private static double getAverageWordLength(String body) {
         int characterNumber = 0;
 
+        String text = body.replaceAll("&([a-z]|[A-Z])+;","");
+
         //counts letters in the article text
-        for (int i = 0; i < body.length( ); i++ ) {
+        for (int i = 0; i < text.length( ); i++ ) {
             if (isLetter(body.charAt(i))) {
                 characterNumber++;
             }
@@ -71,10 +74,10 @@ public class TraitExctractor {
      * @param body article text
      * @return amount of words
      */
-    private static int getUpperCaseWordsAmount(String body){
+    private static int getWordsWithTheFirstUpperCaseLetterAmount(String body){
         int count = 0;
 
-        Pattern patternObject = Pattern.compile("[A-Z][a-z]");
+        Pattern patternObject = Pattern.compile("\\b[A-Z][a-z]+\\b");
         Matcher matcher = patternObject.matcher(body);
 
         while (matcher.find()) {
@@ -89,10 +92,10 @@ public class TraitExctractor {
      * @param body article text
      * @return amount of words
      */
-    private static int getLowerCaseWordsAmount(String body) {
+    private static int getUpperCaseWordsAmount(String body) {
         int count = 0;
 
-        Pattern p = Pattern.compile("\\b[A-Z]{4,}\\b");
+        Pattern p = Pattern.compile("\\b[A-Z]+\\b");
         Matcher m = p.matcher(body);
 
         while (m.find()) {
@@ -110,11 +113,16 @@ public class TraitExctractor {
     private static int getWordsLongerThan10(String body) {
         int count = 0;
 
-        Pattern p = Pattern.compile("^\\w{10,}$");
+        Pattern p = Pattern.compile("\\b[a-zA-Z]+(-[a-zA-Z]+)?('[a-zA-Z]+)?\\b");
         Matcher m = p.matcher(body);
 
         while (m.find()) {
-            count++;
+            String word = m.group(0);
+            word = word.replaceAll("['-]", "");
+
+            if (word.length() > 10) {
+                count++;
+            }
         }
 
         return count;
@@ -127,10 +135,14 @@ public class TraitExctractor {
      */
     private static int getWordsShorterThan4(String body) {
         int count = 0;
-        Pattern p = Pattern.compile("\\b\\w{1,4}\\b");
+        Pattern p = Pattern.compile("\\b[a-zA-Z]+(-[a-zA-Z]+)?('[a-zA-Z]+)?\\b");
         Matcher m = p.matcher(body);
         while (m.find()) {
-            count++;
+            String word = m.group(0);
+            word = word.replaceAll("['-]", "");
+            if (word.length() <= 4) {
+                count++;
+            }
         }
         return count;
     }
@@ -248,6 +260,7 @@ public class TraitExctractor {
             articlesData = parse(pathname);
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
             return null;
         }
 
@@ -259,19 +272,19 @@ public class TraitExctractor {
             char[] minMaxLetters = getTheLeastAndTheMostOccurringLetter(body);
 
             res.add(new Traits(
+                    Integer.parseInt(article[0]),
                     minMaxLetters[1],
                     minMaxLetters[0],
                     getAverageWordLength(body),
-                    getUpperCaseWordsAmount(body),
+                    getWordsWithTheFirstUpperCaseLetterAmount(body),
                     getDigitsAmount(body),
                     numberOfPunctuation(body),
                     getWordsAmount(body),
                     getWordsShorterThan4(body),
                     getWordsLongerThan10(body),
-                    getLowerCaseWordsAmount(body),
+                    getUpperCaseWordsAmount(body),
                     Place.getPlaceFromString(article[1])
             ));
-
         }
 
         return res;
