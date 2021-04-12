@@ -30,12 +30,20 @@ import java.util.concurrent.Future;
 import static results.Histogram.saveHistogramAsPNG;
 
 public class Main {
-    private static void showTable(String title, JTable table) {
+    private static void showTable(String title, JTable... tables) {
         JFrame window = new JFrame(title);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(1280, 720);
-        window.add(new JScrollPane(table));
+        window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.Y_AXIS));
+        for (JTable table: tables) {
+            window.getContentPane().add(new JScrollPane(table));
+        }
         window.setVisible(true);
+    }
+
+    private static double roundTo(double target, int decimalsNumber) {
+        double exp = Math.pow(10, decimalsNumber);
+        return Math.round(target * exp) / exp;
     }
 
     private static void compareResultsFor10DifferentKValuesHistograms(Knn knn) throws IOException {
@@ -91,17 +99,17 @@ public class Main {
                     DefaultCategoryDataset[] dataset = datasets[entry.getKey().getValue()];
                     Double[] params = entry.getValue();
 
-                    precisionData[entry.getKey().getValue()][j][i + 1] = String.valueOf(params[1]);
-                    recallData[entry.getKey().getValue()][j][i + 1] = String.valueOf(params[2]);
-                    F1Data[entry.getKey().getValue()][j][i + 1] = String.valueOf(params[3]);
+                    precisionData[entry.getKey().getValue()][j][i + 1] = String.valueOf(roundTo(params[1]*100, 2));
+                    recallData[entry.getKey().getValue()][j][i + 1] = String.valueOf(roundTo(params[2]*100, 2));
+                    F1Data[entry.getKey().getValue()][j][i + 1] = String.valueOf(roundTo(params[3]*100, 2));
 
                     for(int w = 0; w < params.length - 1; w++) {
-                        dataset[w].addValue(Math.round(params[w+1]*10000) / 100.0, metrics[j].getName(), String.valueOf(ks[i]));
+                        dataset[w].addValue(roundTo(params[w+1]*100, 2), metrics[j].getName(), String.valueOf(ks[i]));
                     }
                 }
 
-                accuracyDataset.addValue(Math.round(assignments.getAccuracy() * 10000) / 100.0, metrics[j].getName(), String.valueOf(ks[i]));
-                accuracyData[j][i + 1] = String.valueOf(assignments.getAccuracy());
+                accuracyDataset.addValue(roundTo(assignments.getAccuracy()*100,2), metrics[j].getName(), String.valueOf(ks[i]));
+                accuracyData[j][i + 1] = String.valueOf(roundTo(assignments.getAccuracy()*100, 2));
             }
         }
 
@@ -157,7 +165,7 @@ public class Main {
                 assignments.calculateFor(knn.getAssignedTextSet());
 
                 accuracyDataset.addValue(assignments.getAccuracy(), metrics[j].getName(), String.valueOf(trainSetRelations[i]));
-                data[j][i + 1] = String.valueOf(assignments.getAccuracy());
+                data[j][i + 1] = String.valueOf(roundTo(assignments.getAccuracy()*100, 2));
             }
         }
 
@@ -192,7 +200,7 @@ public class Main {
             assignments.calculateFor(knn.getAssignedTextSet());
 
             accuracyDataset.addValue(assignments.getAccuracy(), metrics[i].getName(), "");
-            data[i][1] = String.valueOf(assignments.getAccuracy());
+            data[i][1] = String.valueOf(roundTo(assignments.getAccuracy()*100, 2));
         }
 
         saveHistogramAsPNG("Accuracy dla różnych metryk", "Metryki", "Accuracy [%]", accuracyDataset);
@@ -259,15 +267,15 @@ public class Main {
                 assignments.calculateFor(knn.getAssignedTextSet());
 
                 accuracyDataSet.addValue(assignments.getAccuracy(), metrics[j].getName(), String.valueOf(i));
-                accuracyData[j][i + 1] = String.valueOf(assignments.getAccuracy());
+                accuracyData[j][i + 1] = String.valueOf(roundTo(assignments.getAccuracy()*100, 2));
 
                 for (Map.Entry<Place, Double[]> entry: assignments.getAll().entrySet()) {
                     DefaultCategoryDataset[] dataset = datasets[entry.getKey().getValue()];
                     Double[] params = entry.getValue();
 
-                    precisionData[entry.getKey().getValue()][j][i + 1] = String.valueOf(params[1]);
-                    recallData[entry.getKey().getValue()][j][i + 1] = String.valueOf(params[2]);
-                    F1Data[entry.getKey().getValue()][j][i + 1] = String.valueOf(params[3]);
+                    precisionData[entry.getKey().getValue()][j][i + 1] = String.valueOf(roundTo(params[1]*100, 2));
+                    recallData[entry.getKey().getValue()][j][i + 1] = String.valueOf(roundTo(params[2]*100, 2));
+                    F1Data[entry.getKey().getValue()][j][i + 1] = String.valueOf(roundTo(params[3]*100, 2));
 
                     for(int w = 0; w < params.length - 1; w++) {
                         dataset[w].addValue(Math.round(params[w+1]*10000) / 100.0, metrics[j].getName(), String.valueOf(i));
@@ -296,9 +304,11 @@ public class Main {
         showTable("Różne zbiory cech. Accuracy", new JTable(accuracyData, column));
 
         for(Place place: places) {
-            showTable("Różne zbiory cech. Precision dla " + place, new JTable(precisionData[place.getValue()], column));
-            showTable("Różne zbiory cech. Recall dla " + place, new JTable(recallData[place.getValue()], column));
-            showTable("Różne zbiory cech. F1 dla " + place, new JTable(F1Data[place.getValue()], column));
+            showTable(
+                    "Różne zbiory cech. " + place,
+                    new JTable(precisionData[place.getValue()], column),
+                    new JTable(recallData[place.getValue()], column),
+                    new JTable(F1Data[place.getValue()], column));
         }
     }
 
@@ -356,9 +366,9 @@ public class Main {
 
         System.out.println("Making graphs...");
 
-        compareResultsFor10DifferentKValuesHistograms(knn);
-        getAccuracyFor5DifferentSetRelationsHistograms(knn);
-        getAccuracyForDifferentMetrics(knn);
-        getParamsFor4DifferentTraitsFilters(knn);
+//        compareResultsFor10DifferentKValuesHistograms(knn);
+//        getAccuracyFor5DifferentSetRelationsHistograms(knn);
+//        getAccuracyForDifferentMetrics(knn);
+//        getParamsFor4DifferentTraitsFilters(knn);
     }
 }
