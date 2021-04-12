@@ -16,6 +16,8 @@ import java.util.List;
  */
 
 public class EuclideanMetric implements Metric {
+    private static final String name = "Metryka Euklidesowa";
+
     @Override
     public double getDistance(List<Double> v1, List<Double> v2, List<Character> c1, List<Character> c2)
     {
@@ -49,5 +51,9 @@ public class EuclideanMetric implements Metric {
         }
 
         return Math.sqrt(sum);
+    }
+
+    public String getName() {
+        return name;
     }
 }

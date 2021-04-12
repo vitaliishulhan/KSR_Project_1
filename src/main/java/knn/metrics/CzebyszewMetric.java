@@ -16,6 +16,8 @@ import java.util.List;
  * @see knn.metrics.Metric
  */
 public class CzebyszewMetric implements Metric {
+    private static final String name = "Metryka Czebyszewa";
+
     @Override
     public double getDistance(List<Double> v1, List<Double> v2, List<Character> c1, List<Character> c2) {
 
@@ -49,5 +51,9 @@ public class CzebyszewMetric implements Metric {
         }
 
         return Collections.max(distances);
+    }
+
+    public String getName() {
+        return name;
     }
 }

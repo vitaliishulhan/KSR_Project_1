@@ -28,4 +28,5 @@ public interface Metric {
      * @return distance between traits of two articles
      */
     double getDistance(List<Double> v1, List<Double> v2, List<Character> c1, List<Character> c2, boolean[] numberFilter, boolean[] textFilter);
+    String getName();
 }

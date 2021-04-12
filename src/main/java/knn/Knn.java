@@ -51,7 +51,7 @@ public class Knn {
     /**
      * Traits filter
      */
-    private boolean[] filter;
+    private boolean[] filter = new boolean[Traits.getTraitsAmount()];
 
     /**
      * Divides data set to train and test ones according to the given train set percentage and store this percent.

@@ -15,6 +15,8 @@ import java.util.List;
  * @see knn.metrics.Metric
  */
 public class ManhattanMetric implements Metric {
+    private static final String name = "Metryka uliczna";
+
     @Override
     public double getDistance(List<Double> v1, List<Double> v2, List<Character> c1, List<Character> c2) {
 
@@ -48,5 +50,9 @@ public class ManhattanMetric implements Metric {
         }
 
         return sum;
+    }
+
+    public String getName() {
+        return name;
     }
 }

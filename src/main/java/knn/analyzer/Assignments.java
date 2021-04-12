@@ -40,16 +40,23 @@ public class Assignments {
     }
 
     /**
-     * get accuracy from assignment for the given country
-     * @param place country representation
-     * @return accuracy for the given country
+     * returns accuracy
+     * @return accuracy
      */
-    public double getAccuracyFor(final Place place) {
-        return assignments[place.getValue()].getAccuracy();
+    public double getAccuracy() {
+        int trueAssignments = 0;
+        int falseAssignments = 0;
+
+        for (Assignment assignment: assignments) {
+            trueAssignments += assignment.getTrueAssignments();
+            falseAssignments += assignment.getFalseAssignments();
+        }
+
+        return 1.0 * trueAssignments / (trueAssignments + falseAssignments);
     }
 
     /**
-     * get precision from assignment for the given country
+     * returns precision from assignment for the given country
      * @param place country representation
      * @return precision for the given country
      */
@@ -58,7 +65,7 @@ public class Assignments {
     }
 
     /**
-     * get recall from assignment for the given country
+     * returns recall from assignment for the given country
      * @param place country representation
      * @return recall for the given country
      */
@@ -67,7 +74,7 @@ public class Assignments {
     }
 
     /**
-     * get F1 from assignment for the given country
+     * returns F1 from assignment for the given country
      * @param place country representation
      * @return F1 for the given country
      */
@@ -76,7 +83,7 @@ public class Assignments {
     }
 
     /**
-     * Get all information about results analyzing, i.e. all assignments, i.e. all country
+     * returns all information about results analyzing, i.e. all assignments, i.e. all country
      * @return dictionary with all information (country -- information)
      */
     public HashMap<Place, Double[]> getAll() {
@@ -172,10 +179,10 @@ class Assignment {
                 }
             }
         }
-        System.out.println("TP: " + tp);
-        System.out.println("FP: " + fp);
-        System.out.println("FN: " + fn);
-        System.out.println("TN: " + tn);
+//        System.out.println("TP: " + tp);
+//        System.out.println("FP: " + fp);
+//        System.out.println("FN: " + fn);
+//        System.out.println("TN: " + tn);
     }
 
     /**
@@ -238,5 +245,13 @@ class Assignment {
 
     public int[] getMistakesMatrix() {
         return new int[] {tp, tn, fp, fn};
+    }
+
+    public int getTrueAssignments() {
+        return tp + tn;
+    }
+
+    public int getFalseAssignments() {
+        return fp + fn;
     }
 }
