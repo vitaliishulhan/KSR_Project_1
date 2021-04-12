@@ -208,6 +208,10 @@ public class Knn {
         return testSet;
     }
 
+    public List<Traits> getTrainSet() {
+        return trainSet;
+    }
+
     /**
      * Returns hash map, i.e. dictionary, with traits vectors and places assigned to them
      * @return hash map trait vector -- place

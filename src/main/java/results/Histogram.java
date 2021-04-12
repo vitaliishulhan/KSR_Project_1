@@ -29,7 +29,7 @@ public class Histogram {
         renderer.setBarPainter(new StandardBarPainter());
         renderer.setItemMargin(0);
 
-        ChartUtils.saveChartAsPNG(new File("histograms/" + title.replaceAll(" ", "") + ".png"), chart, 1280, 720);
+        ChartUtils.saveChartAsPNG(new File("histograms/" + title.replaceAll("\\s", "_") + ".png"), chart, 1280, 720);
 
 
     }
