@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Histogram {
-    public static void saveHistogramAsPNG(String title, String xLabel, String yLabel, DefaultCategoryDataset dataset) throws IOException {
+    public static void saveHistogramAsPNG(String dir, String title, String xLabel, String yLabel, DefaultCategoryDataset dataset) throws IOException {
         JFreeChart chart = ChartFactory.createBarChart(
                 title,
                 xLabel,
@@ -29,7 +29,7 @@ public class Histogram {
         renderer.setBarPainter(new StandardBarPainter());
         renderer.setItemMargin(0);
 
-        ChartUtils.saveChartAsPNG(new File("histograms/" + title.replaceAll("\\s", "_") + ".png"), chart, 1280, 720);
+        ChartUtils.saveChartAsPNG(new File("histograms/" + dir + '/' + title.replaceAll("\\s", "_") + ".png"), chart, 1280, 720);
 
 
     }

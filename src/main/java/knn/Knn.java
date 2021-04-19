@@ -4,6 +4,7 @@ import extraction.Place;
 import extraction.Traits;
 import knn.metrics.Metric;
 
+import java.io.*;
 import java.util.*;
 
 public class Knn {
@@ -26,22 +27,22 @@ public class Knn {
     /**
      * Traits vector for training
      */
-    private List<Traits> trainSet;
+    private List<Traits> trainSet = new ArrayList<>();
 
     /**
      * Traits vector for testing
      */
-    private List<Traits> testSet;
+    private List<Traits> testSet = new ArrayList<>();
 
     /**
      * The percentage of train set length relative to the whole data set
      */
-    private int trainSetRelation;
+    private int trainSetRelation = 0;
 
     /**
      * Dictionary with traits vector as a key and assigned place for it as a value
      */
-    private final HashMap<Traits, Place> assignedTextSet = new HashMap<>();
+    private final HashMap<Traits, Place> assignedTestSet = new HashMap<>();
 
     /**
      * The nearest neighbours amount
@@ -61,12 +62,44 @@ public class Knn {
     public void setSetRelation(int trainSetRelation) {
         this.trainSetRelation = trainSetRelation <= 0 || trainSetRelation >= 100 ? 50 : trainSetRelation;
 
-        int divider = trainSetRelation <= 0 || trainSetRelation >= 100 ?
-                data.size() / 2 :
-                data.size() * trainSetRelation / 100;
+        if (this.k != 0) {
+            trainSet = new ArrayList<>();
 
-        trainSet = data.subList(0, divider);
-        testSet = data.subList(divider, data.size());
+            int divider = trainSetRelation <= 0 || trainSetRelation >= 100 ?
+                    data.size() / 2 :
+                    data.size() * trainSetRelation / 100;
+
+            List<Traits> datacopy = new ArrayList<>(data);
+
+            Iterator<Traits> it = datacopy.iterator();
+
+            int[] countryCounter = new int[Place.getPlacesAmount() - 1];
+
+            while (it.hasNext()) {
+
+                Traits sample = it.next();
+
+                Place place = sample.getPlace();
+
+                if (countryCounter[place.getValue()] < k) {
+                    trainSet.add(sample);
+                    it.remove();
+                    countryCounter[place.getValue()]++;
+                }
+            }
+
+            it = datacopy.iterator();
+
+            int trainSetSize = trainSet.size();
+
+            while (it.hasNext() && trainSetSize++ < divider) {
+                Traits sample = it.next();
+                trainSet.add(sample);
+                it.remove();
+            }
+
+            testSet = new ArrayList<>(datacopy);
+        }
     }
 
     /**
@@ -76,7 +109,8 @@ public class Knn {
     public void setData(final List<Traits> data) {
         this.data = data;
 
-        setSetRelation(trainSetRelation);
+        if (trainSetRelation != 0 && k != 0)
+            setSetRelation(trainSetRelation);
     }
 
     /**
@@ -180,7 +214,6 @@ public class Knn {
             placesCounter.incrementFor(place);
         }
 
-
         // get result
         return placesCounter.getMax();
     }
@@ -190,14 +223,19 @@ public class Knn {
      *
      */
     public void classifyTestSet() {
-        List<Integer> v = new ArrayList<>();
-
         // clear previous results storing in the hash map
-        assignedTextSet.clear();
+        assignedTestSet.clear();
 
         for (Traits sample: testSet) {
-            assignedTextSet.put(sample, classify(sample));
+            Place place = classify(sample);
+            assignedTestSet.put(sample, place);
+
+            if (sample.getPlace() != Place.USA) {
+                trainSet.add(sample);
+            }
         }
+
+        setSetRelation(trainSetRelation);
     }
 
     /**
@@ -216,7 +254,7 @@ public class Knn {
      * Returns hash map, i.e. dictionary, with traits vectors and places assigned to them
      * @return hash map trait vector -- place
      */
-    public HashMap<Traits, Place> getAssignedTextSet() {
-        return assignedTextSet;
+    public HashMap<Traits, Place> getAssignedTestSet() {
+        return assignedTestSet;
     }
 }

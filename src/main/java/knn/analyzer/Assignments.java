@@ -179,6 +179,7 @@ class Assignment {
                 }
             }
         }
+//        System.out.println("PLACE: " + place);
 //        System.out.println("TP: " + tp);
 //        System.out.println("FP: " + fp);
 //        System.out.println("FN: " + fn);

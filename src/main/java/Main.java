@@ -179,14 +179,14 @@ public class Main {
         Assignments assignments = new Assignments();
         gui.println("\n~~~Analyzing...");
 
-        assignments.calculateFor(knn.getAssignedTextSet());
+        assignments.calculateFor(knn.getAssignedTestSet());
 
         //Show results
         gui.println("\n~~~RESULTS:");
+        gui.println("Accuracy: " + assignments.getAccuracy());
         for (Map.Entry<Place, Double[]> entry: assignments.getAll().entrySet()) {
             gui.println("Place: " + entry.getKey().toString());
             Double[] params = entry.getValue();
-            gui.println("Accuracy: " + params[0]);
             gui.println("Precision: " + params[1]);
             gui.println("Recall: " + params[2]);
             gui.println("F1: " + params[3]);

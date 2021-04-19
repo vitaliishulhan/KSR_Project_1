@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
 import static results.Histogram.saveHistogramAsPNG;
 
 public class Main {
-    private static void showTable(String title, JTable... tables) {
+    private static void showTable(String dir, String title, JTable... tables) {
         JFrame window = new JFrame(title);
         window.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.Y_AXIS));
@@ -58,7 +58,7 @@ public class Main {
         c.paint(im.getGraphics());
 
         try {
-            ImageIO.write(im, "PNG", new File("tables/" + title.replaceAll(" ", "_") + ".png"));
+            ImageIO.write(im, "PNG", new File("tables/" + dir + '/' + title.replaceAll(" ", "_") + ".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,15 +70,13 @@ public class Main {
         return Math.round(target * exp) / exp;
     }
 
-    private static void compareResultsFor10DifferentKValuesHistograms(Knn knn) throws IOException {
+    private static void compareResultsFor10DifferentKValues(Knn knn) throws IOException {
         final int[] ks = {1,2,4,5,6,8,10,15,20,30};
         final Metric[] metrics = {
                 new EuclideanMetric(),
                 new ManhattanMetric(),
                 new CzebyszewMetric()
         };
-
-        knn.setSetRelation(60);
 
         DefaultCategoryDataset[][] datasets = new DefaultCategoryDataset[Place.getPlacesAmount() - 1][3];
         DefaultCategoryDataset accuracyDataset = new DefaultCategoryDataset();
@@ -95,10 +93,12 @@ public class Main {
             }
         }
 
+
         for (int i = 0; i < ks.length; i++) {
             knn.setK(ks[i]);
 
             for (int j = 0; j < metrics.length; j++) {
+                knn.setSetRelation(40);
                 knn.setMetric(metrics[j]);
                 knn.classifyTestSet();
 
@@ -117,7 +117,7 @@ public class Main {
                 }
 
                 Assignments assignments = new Assignments();
-                assignments.calculateFor(knn.getAssignedTextSet());
+                assignments.calculateFor(knn.getAssignedTestSet());
 
                 for (Map.Entry<Place, Double[]> entry: assignments.getAll().entrySet()) {
                     DefaultCategoryDataset[] dataset = datasets[entry.getKey().getValue()];
@@ -139,7 +139,7 @@ public class Main {
 
         String xLabel = "Liczba k najbliższych sąsiadów";
 
-        saveHistogramAsPNG("Różne k. Accuracy", xLabel, "Accuracy [%]", accuracyDataset);
+        saveHistogramAsPNG("1", "Różne k. Accuracy", xLabel, "Accuracy [%]", accuracyDataset);
 
         Place[] places = Arrays.copyOfRange(Place.values(), 0, Place.getPlacesAmount() - 1);
 
@@ -147,18 +147,18 @@ public class Main {
             int placeInt = place.getValue();
             DefaultCategoryDataset[] placeDataset = datasets[placeInt];
 
-            saveHistogramAsPNG("Różne k. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
-            saveHistogramAsPNG("Różne k. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
-            saveHistogramAsPNG("Różne k. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
+            saveHistogramAsPNG("1", "Różne k. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
+            saveHistogramAsPNG("1", "Różne k. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
+            saveHistogramAsPNG("1", "Różne k. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
         }
 
         String[] column = {"Metryka", "1", "2", "4", "5", "6", "8", "10", "15", "20", "30"};
 
-        showTable("Różne k. Accuracy", new JTable(accuracyData, column));
+        showTable("1", "Różne k. Accuracy", new JTable(accuracyData, column));
 
         for(Place place: places) {
             showTable(
-                    "Różne k. " + place,
+                    "1", "Różne k. " + place,
                     new JTable(precisionData[place.getValue()], column),
                     new JTable(recallData[place.getValue()], column),
                     new JTable(F1Data[place.getValue()], column)
@@ -166,7 +166,7 @@ public class Main {
         }
     }
 
-    private static void getResultsFor5DifferentSetRelationsHistograms(Knn knn) throws IOException {
+    private static void getResultsFor5DifferentSetRelations(Knn knn) throws IOException {
         final int[] trainSetRelations = {40, 50, 60, 70, 80};
         final Metric[] metrics = {
                 new EuclideanMetric(),
@@ -190,9 +190,8 @@ public class Main {
         }
 
         for (int i = 0; i < trainSetRelations.length; i++) {
-            knn.setSetRelation(trainSetRelations[i]);
-
             for (int j = 0; j < metrics.length; j++) {
+                knn.setSetRelation(trainSetRelations[i]);
                 knn.setMetric(metrics[j]);
                 knn.classifyTestSet();
 
@@ -214,7 +213,7 @@ public class Main {
 
 
                 Assignments assignments = new Assignments();
-                assignments.calculateFor(knn.getAssignedTextSet());
+                assignments.calculateFor(knn.getAssignedTestSet());
 
                 final String columnKey = trainSetRelations[i] + "/" + (100 - trainSetRelations[i]);
 
@@ -238,7 +237,7 @@ public class Main {
 
         String[] column = {"Metryka", "40/60", "50/50", "60/40", "70/30", "80/20"};
 
-        saveHistogramAsPNG("Różne proporcje zbiorów. Accuracy", "Proporcja zbioru uczącego [%]", "Accuracy [%]", accuracyDataset);
+        saveHistogramAsPNG("2", "Różne proporcje zbiorów. Accuracy", "Proporcja zbioru uczącego [%]", "Accuracy [%]", accuracyDataset);
 
         Place[] places = Arrays.copyOfRange(Place.values(), 0, Place.getPlacesAmount() - 1);
 
@@ -247,16 +246,16 @@ public class Main {
             int placeInt = place.getValue();
             DefaultCategoryDataset[] placeDataset = datasets[placeInt];
 
-            saveHistogramAsPNG("Różne proporcje zbiorów. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
-            saveHistogramAsPNG("Różne proporcje zbiorów. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
-            saveHistogramAsPNG("Różne proporcje zbiorów. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
+            saveHistogramAsPNG("2", "Różne proporcje zbiorów. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
+            saveHistogramAsPNG("2", "Różne proporcje zbiorów. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
+            saveHistogramAsPNG("2", "Różne proporcje zbiorów. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
         }
 
-        showTable("Różne relacje zbiorów. Accuracy", new JTable(accuracyData, column));
+        showTable("2", "Różne relacje zbiorów. Accuracy", new JTable(accuracyData, column));
 
         for(Place place: places) {
             showTable(
-                    "Różne relacje zbiorów. " + place,
+                    "2", "Różne relacje zbiorów. " + place,
                     new JTable(precisionData[place.getValue()], column),
                     new JTable(recallData[place.getValue()], column),
                     new JTable(F1Data[place.getValue()], column));
@@ -270,8 +269,7 @@ public class Main {
                 new CzebyszewMetric()
         };
 
-        knn.setK(7);
-        knn.setSetRelation(60);
+        knn.setK(5);
 
         DefaultCategoryDataset[][] datasets = new DefaultCategoryDataset[Place.getPlacesAmount() - 1][3];
         DefaultCategoryDataset accuracyDataset = new DefaultCategoryDataset();
@@ -287,6 +285,7 @@ public class Main {
         }
 
         for (int i = 0; i < metrics.length; i++) {
+            knn.setSetRelation(40);
             knn.setMetric(metrics[i]);
             knn.classifyTestSet();
 
@@ -305,7 +304,7 @@ public class Main {
             }
 
             Assignments assignments = new Assignments();
-            assignments.calculateFor(knn.getAssignedTextSet());
+            assignments.calculateFor(knn.getAssignedTestSet());
 
             accuracyDataset.addValue(assignments.getAccuracy(), metrics[i].getName(), "");
             accuracyData[i][1] = String.valueOf(roundTo(assignments.getAccuracy()*100, 2));
@@ -324,7 +323,7 @@ public class Main {
             }
         }
 
-        saveHistogramAsPNG("Różne metryki. Accuracy", "Metryki", "Accuracy [%]", accuracyDataset);
+        saveHistogramAsPNG("3", "Różne metryki. Accuracy", "Metryki", "Accuracy [%]", accuracyDataset);
 
         Place[] places = Arrays.copyOfRange(Place.values(), 0, Place.getPlacesAmount() - 1);
 
@@ -333,9 +332,9 @@ public class Main {
             int placeInt = place.getValue();
             DefaultCategoryDataset[] placeDataset = datasets[placeInt];
 
-            saveHistogramAsPNG("Różne metryki. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
-            saveHistogramAsPNG("Różne metryki. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
-            saveHistogramAsPNG("Różne metryki. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
+            saveHistogramAsPNG("3", "Różne metryki. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
+            saveHistogramAsPNG("3", "Różne metryki. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
+            saveHistogramAsPNG("3","Różne metryki. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
         }
 
 
@@ -343,11 +342,11 @@ public class Main {
 
 
         JTable table = new JTable(accuracyData, column);
-        showTable("Różne metryki. Accuracy", table);
+        showTable("3","Różne metryki. Accuracy", table);
 
         for (Place place: places) {
             showTable(
-                    "Różne metryki. " + place,
+                    "3","Różne metryki. " + place,
                     new JTable(precisionData[place.getValue()], new String[] {"Metryka/miara", "Precision"}),
                     new JTable(recallData[place.getValue()], new String[] {"Metryka/miara", "Recall"}),
                     new JTable(F1Data[place.getValue()], new String[] {"Metryka/miara", "F1"}));
@@ -356,8 +355,8 @@ public class Main {
 
     private static void getParamsFor4DifferentTraitsFilters(Knn knn) throws IOException {
         final boolean[][] filters = {
-                {true,true,true,true,true,true,true,true,false,false},
-                {false,true,false,true,true,true,true,true,false,false},
+                {true,true,true,true,true,true,true,true,false,false}, // without text traits
+                {false,true,false,true,true,true,true,true,false,false}, // without text traits, avg word length
                 {false,true,false,false,true,false,true,true,false,false},
                 {true,false,true,false,false,false,false,false,true,true}
         };
@@ -368,7 +367,7 @@ public class Main {
         };
 
         knn.setK(5);
-        knn.setSetRelation(60);
+
 
         DefaultCategoryDataset accuracyDataSet = new DefaultCategoryDataset();
         DefaultCategoryDataset[][] datasets = new DefaultCategoryDataset[Place.getPlacesAmount() - 1][3];
@@ -388,6 +387,7 @@ public class Main {
             knn.setFilter(filters[i]);
 
             for (int j = 0; j < metrics.length; j++) {
+                knn.setSetRelation(40);
                 knn.setMetric(metrics[j]);
                 knn.classifyTestSet();
 
@@ -406,7 +406,7 @@ public class Main {
                 }
 
                 Assignments assignments = new Assignments();
-                assignments.calculateFor(knn.getAssignedTextSet());
+                assignments.calculateFor(knn.getAssignedTestSet());
 
                 accuracyDataSet.addValue(assignments.getAccuracy(), metrics[j].getName(), String.valueOf(i));
                 accuracyData[j][i + 1] = String.valueOf(roundTo(assignments.getAccuracy()*100, 2));
@@ -428,7 +428,7 @@ public class Main {
 
         String xLabel = "Filters";
 
-        saveHistogramAsPNG("Filters. Accuracy", xLabel, "Accuracy [%]", accuracyDataSet);
+        saveHistogramAsPNG("4", "Filters. Accuracy", xLabel, "Accuracy [%]", accuracyDataSet);
 
         Place[] places = Arrays.copyOfRange(Place.values(), 0, Place.getPlacesAmount() - 1);
 
@@ -436,18 +436,18 @@ public class Main {
             int placeInt = place.getValue();
             DefaultCategoryDataset[] placeDataset = datasets[placeInt];
 
-            saveHistogramAsPNG("Filters. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
-            saveHistogramAsPNG("Filters. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
-            saveHistogramAsPNG("Filters. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
+            saveHistogramAsPNG("4", "Filters. Precision dla " + place, xLabel, "Precision [%]", placeDataset[0]);
+            saveHistogramAsPNG("4", "Filters. Recall dla " + place, xLabel, "Recall [%]", placeDataset[1]);
+            saveHistogramAsPNG("4", "Filters. F1 dla " + place, xLabel, "F1 [%]", placeDataset[2]);
         }
 
         String[] column = {"Metryka", "1", "2", "3", "4"};
 
-        showTable("Różne zbiory cech. Accuracy", new JTable(accuracyData, column));
+        showTable("4", "Różne zbiory cech. Accuracy", new JTable(accuracyData, column));
 
         for(Place place: places) {
             showTable(
-                    "Różne zbiory cech. " + place,
+                    "4", "Różne zbiory cech. " + place,
                     new JTable(precisionData[place.getValue()], column),
                     new JTable(recallData[place.getValue()], column),
                     new JTable(F1Data[place.getValue()], column));
@@ -488,29 +488,38 @@ public class Main {
 
         Collections.shuffle(data);
 
-        ArrayList<Traits> filteredData = new ArrayList<>();
-        int usaCounter = 0;
+//        ArrayList<Traits> filteredData = new ArrayList<>();
+//        int usaCounter = 0;
+//
+//        for (Traits sample: data) {
+//            if (sample.getPlace() == Place.USA) {
+//                if (usaCounter < 940) {
+//                    filteredData.add(sample);
+//                    usaCounter++;
+//                }
+//            } else {
+//                filteredData.add(sample);
+//            }
+//        }
+//
+//        Collections.shuffle(filteredData);
 
-        for (Traits sample: data) {
-            if (sample.getPlace() == Place.USA) {
-                if (usaCounter < 940) {
-                    filteredData.add(sample);
-                    usaCounter++;
-                }
-            } else {
-                filteredData.add(sample);
-            }
-        }
+        knn.setData(data);
 
-        Collections.shuffle(filteredData);
-
-        knn.setData(filteredData);
 
         System.out.println("Making graphs...");
 
-        compareResultsFor10DifferentKValuesHistograms(knn);
-        getResultsFor5DifferentSetRelationsHistograms(knn);
-        getResultsForDifferentMetrics(knn);
-        getParamsFor4DifferentTraitsFilters(knn);
+        System.out.println("Experyment #1");
+        compareResultsFor10DifferentKValues(knn);
+
+//        System.out.println("Experyment #2");
+//        getResultsFor5DifferentSetRelations(knn);
+//
+//        System.out.println("Experyment #3");
+//        getResultsForDifferentMetrics(knn);
+//
+//        System.out.println("Experyment #4");
+//        getParamsFor4DifferentTraitsFilters(knn);
+
     }
 }
